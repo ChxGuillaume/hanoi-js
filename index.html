@@ -1,0 +1,159 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Hanoi Game</title>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.min.js"></script>
+        <style>
+            html, body {
+                background: #444;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            var hanoiGame;
+            var barSelected;
+            var moveIndex = 0;
+
+            function setup() {
+                createCanvas(windowWidth - 100, windowHeight - 100);
+
+                hanoiGame = new Hanoi();
+            }
+
+            function draw() {
+                background(255);
+
+                hanoiGame.draw();
+            }
+
+            class Hanoi {
+
+                constructor() {
+                    this.bars = [new Bar(1), new Bar(2), new Bar(3)];
+                }
+
+                draw() {
+                    this.bars.forEach(e => {
+                        e.draw();
+                    });
+                }
+
+            }
+
+            class Bar {
+
+                constructor(pos) {
+                    this.pos = pos;
+
+                    this.width = 10;
+                    this.height = windowHeight - 200;
+                    this.x = (windowWidth - 100) / 3 * pos - (windowWidth - 100) / 3 / 2 - this.width / 2;
+
+                    this.bricks = [];
+
+                    if (pos === 1) {
+                        var count = new Number(prompt("Enter Bricks Count", "0"));
+                        // var count = 3;
+
+                        for (let i = 1; i <= count; i++) {
+                            this.bricks.push(new Brick(i, count));
+                        }
+                    }
+                }
+
+                draw() {
+                    noStroke();
+                    if (barSelected !== undefined) {
+                        if (barSelected + 1 === this.pos) fill (0, 0, 255);
+                        else {
+                            if (this.bricks.length === 0 || this.bricks[this.bricks.length - 1].width > hanoiGame.bars[barSelected].bricks[hanoiGame.bars[barSelected].bricks.length - 1].width) {
+                                fill(0, 255, 0);
+                            } else fill(255, 0, 0);
+                        }
+                    } else fill(0);
+
+
+                    if (mouseX >= this.x - 25 && mouseX <= this.x + this.width + 25 && mouseY >= 100) {
+                        if (barSelected === undefined) {
+                            fill(150);
+                        }
+                    }
+                    rect(this.x, 100, this.width, this.height);
+
+                    this.bricks.forEach((e, index) => {
+                        e.draw(this.x + this.width / 2, index);
+                    });
+                }
+
+                select() {
+                    if (mouseX >= this.x - 25 && mouseX <= this.x + this.width + 25 && mouseY >= 100) {
+                        if (this.bricks.length > 0) {
+                            return true;
+                        }
+                    }
+                }
+
+                selectOnly() {
+                    return (mouseX >= this.x - 25 && mouseX <= this.x + this.width + 25 && mouseY >= 100);
+                }
+
+            }
+
+            class Brick {
+
+                constructor(num, numMax) {
+                    this.width = (((windowWidth - 100) / 3) - 200) - (((windowWidth - 100) / 3) - 200) / numMax * num + 60;
+                    this.height = numMax * 50 >= (windowHeight - 250) ? (windowHeight - 250) / numMax : 50;
+                }
+                
+                draw(posX, posY) {
+                    stroke(0);
+                    fill(255);
+                    strokeWeight(3);
+                    rect(posX - (this.width / 2), (windowHeight - 100) - (this.height * (posY + 1)), this.width, this.height);
+                }
+
+            }
+
+            function mouseClicked() {
+                if (barSelected === undefined) {
+                    hanoiGame.bars.forEach((e, index) => {
+                        if (e.select()) {
+                            barSelected = index;
+                        }
+                    });
+                } else {
+                    hanoiGame.bars.forEach((e, index) => {
+                        if (barSelected !== undefined && e.selectOnly() && (e.bricks.length === 0 || e.bricks[e.bricks.length - 1].width > hanoiGame.bars[barSelected].bricks[hanoiGame.bars[barSelected].bricks.length - 1].width)) {
+                            e.bricks.push(hanoiGame.bars[barSelected].bricks.pop());
+                            barSelected = undefined;
+                        } else if (e.selectOnly() && barSelected === index) {
+                            barSelected = undefined;
+                        }
+                    });
+                }
+            }
+    
+            function moveTower(height, fromPole, toPole, withPole) {
+                if (height >= 1) {
+                    moveTower(height - 1, fromPole, withPole, toPole);
+                    setTimeout(() => {
+                        moveDisk(fromPole, toPole);
+                    }, moveIndex * 1);
+                    moveIndex++;
+                    moveTower(height - 1, withPole, toPole, fromPole);
+                }
+            }
+
+            function moveDisk(fromPole, toPole) {
+                hanoiGame.bars[toPole].bricks.push(hanoiGame.bars[fromPole].bricks.pop());
+            }
+
+        </script>
+    </body>
+</html>
