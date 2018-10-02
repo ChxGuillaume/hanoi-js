@@ -1,0 +1,31 @@
+<html>
+    <head>
+
+    </head>
+    <body>
+        <input type="range" name="range" id="range" min=0 max=1000 value="250">
+        <div id="dvalue"></div>
+
+        <script>
+            var prevTS = getTS();
+
+            function intervalTester(time) {
+                setTimeout(() => {
+                    document.getElementById("dvalue").innerHTML = ("<strong>Wanted:</strong> " + (document.getElementById("range").value)
+                    + " - <strong>Current:</strong> " + (getTS() - prevTS)
+                    + " - <strong>Dif:</strong> " + (new Number(document.getElementById("range").value) + (getTS() - prevTS)));
+
+                    prevTS = getTS();
+
+                    intervalTester(document.getElementById("range").value);
+                }, time);
+            }
+            
+            function getTS() {
+                return new Date().getTime();
+            }
+
+            intervalTester(document.getElementById("range").value);
+        </script>
+    </body>
+</html>
